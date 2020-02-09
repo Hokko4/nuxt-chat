@@ -1,98 +1,87 @@
 <template>
-  <v-layout
-    column
-    justify-center
-    align-center
-  >
-    <v-flex
-      xs12
-      sm8
-      md6
-    >
-      <div class="text-center">
-        <logo />
-        <vuetify-logo />
+  <v-layout column justify-center align-center>
+    <v-flex xs12 sm8 md6>
+      <div class="test" v-if="user.uid" key="login">
+        {{ user.displayName }}
+        <button type="button" @click="doLogout">ログアウト</button>
       </div>
-      <v-card>
-        <v-card-title class="headline">
-          Welcome to the Vuetify + Nuxt.js template
-        </v-card-title>
-        <v-card-text>
-          <p>
-            Vuetify is a progressive Material Design component framework for
-            Vue.js. It was designed to empower developers to create amazing
-            applications.
-          </p>
-          <p>
-            For more information on Vuetify, check out the
-            <a
-              href="https://vuetifyjs.com"
-              target="_blank"
-            > documentation </a>.
-          </p>
-          <p>
-            If you have questions, please join the official
-            <a
-              href="https://chat.vuetifyjs.com/"
-              target="_blank"
-              title="chat"
-            >
-              discord </a>.
-          </p>
-          <p>
-            Find a bug? Report it on the github
-            <a
-              href="https://github.com/vuetifyjs/vuetify/issues"
-              target="_blank"
-              title="contribute"
-            >
-              issue board </a>.
-          </p>
-          <p>
-            Thank you for developing with Vuetify and I look forward to bringing
-            more exciting features in the future.
-          </p>
-          <div class="text-xs-right">
-            <em><small>&mdash; John Leider</small></em>
-          </div>
-          <hr class="my-3" />
-          <a
-            href="https://nuxtjs.org/"
-            target="_blank"
-          >
-            Nuxt Documentation
-          </a>
-          <br />
-          <a
-            href="https://github.com/nuxt/nuxt.js"
-            target="_blank"
-          >
-            Nuxt GitHub
-          </a>
-        </v-card-text>
-        <v-card-actions>
-          <v-spacer />
-          <v-btn
-            color="primary"
-            nuxt
-            to="/inspire"
-          >
-            Continue
-          </v-btn>
-        </v-card-actions>
-      </v-card>
+      <div v-else key="logout">
+        <button type="button" @click="doLogin">ログイン</button>
+      </div>
     </v-flex>
   </v-layout>
 </template>
 
 <script lang="ts">
 import { Component, Vue } from 'vue-property-decorator'
+import firebase from '~/plugins/firebase'
+import auth from '~/plugins/auth'
 
 @Component({
   components: {
     Logo: () => import('~/components/Logo.vue'),
     VuetifyLogo: () => import('~/components/VuetifyLogo.vue')
+  },
+  data() {
+    return {
+      user: {},
+      chat: [],
+      input: ''
+    }
+  },
+  created() {},
+  mounted() {
+    auth().then(user => {
+      this.$data.user = user ? user : {}
+      const rMsg = firebase.database().ref('message')
+      if (user) {
+        this.$data.chat = []
+        rMsg.limitToLast(10).on('child_added', snap => {
+          const message = snap.val()
+          this.$data.chat.push({
+            key: snap.key,
+            name: message.name,
+            image: message.image,
+            message: message.message
+          })
+        })
+      } else {
+        rMsg.limitToLast(10).off('child_added', snap => {
+          const message = snap.val()
+          this.$data.chat.push({
+            key: snap.key,
+            name: message.name,
+            image: message.image,
+            message: message.message
+          })
+        })
+      }
+    })
+  },
+  methods: {
+    doLogin() {
+      const provider = new firebase.auth.TwitterAuthProvider()
+      firebase.auth().signInWithPopup(provider)
+    },
+    doLogout() {
+      firebase.auth().signOut()
+    },
+    childAdded(snap) {
+      const message = snap.val()
+      this.$data.chat.push({
+        key: snap.key,
+        name: message.name,
+        image: message.image,
+        message: message.message
+      })
+      // this.scrollBottom()
+    }
   }
 })
-export default class Index extends Vue {}
+export default class Index extends Vue {
+  user: object = {}
+  chat: Array<object> = []
+
+  childAdded(): void {}
+}
 </script>
