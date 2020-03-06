@@ -24,29 +24,47 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar :clipped-left="clipped" fixed app>
+    <v-app-bar
+      :clipped-left="clipped"
+      fixed
+      app
+    >
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
-      <v-btn icon @click.stop="miniVariant = !miniVariant">
-        <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
-      </v-btn>
-      <v-btn icon @click.stop="clipped = !clipped">
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
-      <v-btn icon @click.stop="fixed = !fixed">
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
-      <v-spacer />
-      <v-btn icon @click.stop="rightDrawer = !rightDrawer">
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+      <div>
+        <div
+          class="test"
+          v-if="user.uid"
+          key="login"
+        >
+          <img :src="user.photoURL">
+          <button
+            type="button"
+            @click="doLogout"
+          >ログアウト</button>
+        </div>
+        <div
+          v-else
+          key="logout"
+        >
+          <button
+            type="button"
+            @click="doLogin"
+          >ログイン</button>
+        </div>
+      </div>
     </v-app-bar>
     <v-content>
       <v-container>
         <nuxt />
       </v-container>
     </v-content>
-    <v-navigation-drawer v-model="rightDrawer" :right="right" temporary fixed>
+    <v-navigation-drawer
+      v-model="rightDrawer"
+      :right="right"
+      temporary
+      fixed
+    >
       <v-list>
         <v-list-item @click.native="right = !right">
           <v-list-item-action>
@@ -58,14 +76,21 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-footer :fixed="fixed" app>
+    <v-footer
+      :fixed="fixed"
+      app
+    >
       <span>&copy; 2020 Hokko4</span>
     </v-footer>
   </v-app>
 </template>
 
-<script>
-export default {
+<script lang="ts">
+import { Component, Vue } from 'vue-property-decorator'
+import firebase from '~/plugins/firebase'
+import auth from '~/plugins/auth'
+
+@Component({
   data() {
     return {
       clipped: false,
@@ -86,8 +111,27 @@ export default {
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Nuxt Chat'
+      title: 'Nuxt Chat',
+      user: {}
+    }
+  },
+  mounted() {
+    auth().then(user => {
+      this.$data.user = user ? user : {}
+    })
+  },
+  methods: {
+    doLogin() {
+      const provider = new firebase.auth.TwitterAuthProvider()
+      firebase.auth().signInWithPopup(provider)
+    },
+    doLogout() {
+      firebase.auth().signOut()
+      location.reload()
     }
   }
+})
+export default class Index extends Vue {
+  user: object = {}
 }
 </script>

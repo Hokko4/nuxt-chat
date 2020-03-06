@@ -1,13 +1,34 @@
 <template>
-  <v-layout column justify-center align-center>
-    <v-flex xs12 sm8 md6>
-      <div class="test" v-if="user.uid" key="login">
+  <v-layout
+    column
+    justify-center
+    align-center
+  >
+    <v-flex
+      xs12
+      sm8
+      md6
+    >
+      <!-- <div
+        class="test"
+        v-if="user.uid"
+        key="login"
+      >
         {{ user.displayName }}
-        <button type="button" @click="doLogout">ログアウト</button>
+        <button
+          type="button"
+          @click="doLogout"
+        >ログアウト</button>
       </div>
-      <div v-else key="logout">
-        <button type="button" @click="doLogin">ログイン</button>
-      </div>
+      <div
+        v-else
+        key="logout"
+      >
+        <button
+          type="button"
+          @click="doLogin"
+        >ログイン</button>
+      </div> -->
     </v-flex>
   </v-layout>
 </template>
@@ -59,13 +80,6 @@ import auth from '~/plugins/auth'
     })
   },
   methods: {
-    doLogin() {
-      const provider = new firebase.auth.TwitterAuthProvider()
-      firebase.auth().signInWithPopup(provider)
-    },
-    doLogout() {
-      firebase.auth().signOut()
-    },
     childAdded(snap) {
       const message = snap.val()
       this.$data.chat.push({
