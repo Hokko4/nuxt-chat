@@ -1,52 +1,35 @@
 <template>
-  <v-layout
-    justify-center
-    align-center
-  >
-    <v-flex
-      xs12
-      sm8
-      md6
-    >
-      <transition-group
-        name="chat"
-        tag="div"
-        class="list content"
-      >
-        <section
+  <v-layout justify-center align-center>
+    <v-flex>
+      <transition-group name="chat" tag="div" class="comment">
+        <div
           v-for="{ key, name, image, message } in chat"
           :key="key"
-          class="item"
+          class="comment__item"
         >
-          <div class="item-image"><img :src="image"></div>
-          <div class="item-detail">
-            <div class="item-name">{{ name }}</div>
-            <div class="item-message">
-              <div
-                tag="div"
-                :text="message"
-              >
-              </div>
+          <div class="comment__item-image">
+            <img :src="image" class="" />
+          </div>
+          <div class="comment__item-detail">
+            <div class="comment__item-name">{{ name }}</div>
+            <div class="comment__item-message">
+              <div class="">{{ message }}</div>
             </div>
           </div>
-        </section>
+        </div>
       </transition-group>
 
-      <form
-        action=""
-        @submit.prevent="doSend"
-        class=""
-      >
-        <div class="">
+      <form action="" @submit.prevent="doSend" class="chatform">
+        <div class="chatform__inner">
           <textarea
-            name=""
-            id=""
             v-model="input"
             :disabled="!user.uid"
             @keydown.enter.exact.prevent="doSend"
-            class=""
+            class="chatform__textarea"
           ></textarea>
-          <button type="submit">送信</button>
+          <button type="submit" :disabled="!user.uid" class="chatform__btn">
+            送信
+          </button>
         </div>
       </form>
     </v-flex>
@@ -70,8 +53,7 @@ import auth from '~/plugins/auth'
       input: ''
     }
   },
-  created() {},
-  mounted() {
+  created() {
     auth().then(user => {
       this.$data.user = user ? user : {}
       const rMsg = firebase.database().ref('message')
@@ -85,6 +67,9 @@ import auth from '~/plugins/auth'
             image: message.image,
             message: message.message
           })
+          this.$nextTick(() => {
+            window.scrollTo(0, document.body.offsetHeight)
+          })
         })
       } else {
         rMsg.limitToLast(10).off('child_added', snap => {
@@ -95,26 +80,14 @@ import auth from '~/plugins/auth'
             image: message.image,
             message: message.message
           })
+          this.$nextTick(() => {
+            window.scrollTo(0, document.body.offsetHeight)
+          })
         })
       }
     })
   },
   methods: {
-    scrollBottom() {
-      this.$nextTick(() => {
-        window.scrollTo(0, document.body.clientHeight)
-      })
-    },
-    childAdded(snap) {
-      const message = snap.val()
-      this.$data.chat.push({
-        key: snap.key,
-        name: message.name,
-        image: message.image,
-        message: message.message
-      })
-      this.$data.scrollBottom()
-    },
     doSend() {
       if (this.$data.user.uid && this.$data.input.length) {
         firebase
@@ -130,6 +103,9 @@ import auth from '~/plugins/auth'
               this.$data.input = ''
             }
           )
+        this.$nextTick(() => {
+          window.scrollTo(0, document.body.offsetHeight)
+        })
       }
     }
   }
@@ -137,7 +113,43 @@ import auth from '~/plugins/auth'
 export default class Index extends Vue {
   user: object = {}
   chat: Array<object> = []
-
-  childAdded(): void {}
 }
 </script>
+
+<style lang="scss" scoped>
+.chatform {
+  width: 100%;
+}
+.chatform__inner {
+  display: flex;
+  align-items: flex-end;
+}
+.chatform__textarea {
+  flex: 1 1 80%;
+  height: 80px;
+  padding: 10px;
+  border: 1px solid #848688;
+  border-radius: 5px;
+  background: #222529;
+  outline: none;
+}
+.chatform__btn {
+  margin-left: 10px;
+  padding: 15px;
+  border-radius: 5px;
+  background: #60af9d;
+  line-height: 1;
+  outline: none;
+
+  &:disabled {
+    background: #35373b;
+  }
+}
+.chat-enter-active {
+  transition: all 1s;
+}
+.chat-enter {
+  opacity: 0;
+  transform: translateX(-1em);
+}
+</style>

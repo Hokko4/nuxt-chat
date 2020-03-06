@@ -24,33 +24,16 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-app-bar
-      :clipped-left="clipped"
-      fixed
-      app
-    >
+    <v-app-bar :clipped-left="clipped" fixed app>
       <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
-      <div>
-        <div
-          class="test"
-          v-if="user.uid"
-          key="login"
-        >
-          <img :src="user.photoURL">
-          <button
-            type="button"
-            @click="doLogout"
-          >ログアウト</button>
+      <div class="user-prof">
+        <div class="user-prof__login" v-if="user.uid" key="login">
+          <button type="button" @click="doLogout">ログアウト</button>
+          <img :src="user.photoURL" class="" />
         </div>
-        <div
-          v-else
-          key="logout"
-        >
-          <button
-            type="button"
-            @click="doLogin"
-          >ログイン</button>
+        <div v-else key="logout" class="user-prof__logout">
+          <button type="button" @click="doLogin">ログイン</button>
         </div>
       </div>
     </v-app-bar>
@@ -59,12 +42,7 @@
         <nuxt />
       </v-container>
     </v-content>
-    <v-navigation-drawer
-      v-model="rightDrawer"
-      :right="right"
-      temporary
-      fixed
-    >
+    <v-navigation-drawer v-model="rightDrawer" :right="right" temporary fixed>
       <v-list>
         <v-list-item @click.native="right = !right">
           <v-list-item-action>
@@ -76,10 +54,7 @@
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
-    <v-footer
-      :fixed="fixed"
-      app
-    >
+    <v-footer :fixed="fixed" app>
       <span>&copy; 2020 Hokko4</span>
     </v-footer>
   </v-app>
@@ -135,3 +110,24 @@ export default class Index extends Vue {
   user: object = {}
 }
 </script>
+
+<style lang="scss" scoped>
+.user-prof {
+  margin-left: auto;
+}
+
+.user-prof__login {
+  display: flex;
+  align-items: center;
+
+  img {
+    width: 40px;
+    height: 40px;
+    margin-left: 10px;
+  }
+}
+
+.user-prof__logout {
+  display: flex;
+}
+</style>
