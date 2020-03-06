@@ -1,6 +1,5 @@
 <template>
   <v-layout
-    column
     justify-center
     align-center
   >
@@ -9,26 +8,47 @@
       sm8
       md6
     >
-      <!-- <div
-        class="test"
-        v-if="user.uid"
-        key="login"
+      <transition-group
+        name="chat"
+        tag="div"
+        class="list content"
       >
-        {{ user.displayName }}
-        <button
-          type="button"
-          @click="doLogout"
-        >ログアウト</button>
-      </div>
-      <div
-        v-else
-        key="logout"
+        <section
+          v-for="{ key, name, image, message } in chat"
+          :key="key"
+          class="item"
+        >
+          <div class="item-image"><img :src="image"></div>
+          <div class="item-detail">
+            <div class="item-name">{{ name }}</div>
+            <div class="item-message">
+              <div
+                tag="div"
+                :text="message"
+              >
+              </div>
+            </div>
+          </div>
+        </section>
+      </transition-group>
+
+      <form
+        action=""
+        @submit.prevent="doSend"
+        class=""
       >
-        <button
-          type="button"
-          @click="doLogin"
-        >ログイン</button>
-      </div> -->
+        <div class="">
+          <textarea
+            name=""
+            id=""
+            v-model="input"
+            :disabled="!user.uid"
+            @keydown.enter.exact.prevent="doSend"
+            class=""
+          ></textarea>
+          <button type="submit">送信</button>
+        </div>
+      </form>
     </v-flex>
   </v-layout>
 </template>
@@ -80,6 +100,11 @@ import auth from '~/plugins/auth'
     })
   },
   methods: {
+    scrollBottom() {
+      this.$nextTick(() => {
+        window.scrollTo(0, document.body.clientHeight)
+      })
+    },
     childAdded(snap) {
       const message = snap.val()
       this.$data.chat.push({
@@ -88,7 +113,24 @@ import auth from '~/plugins/auth'
         image: message.image,
         message: message.message
       })
-      // this.scrollBottom()
+      this.$data.scrollBottom()
+    },
+    doSend() {
+      if (this.$data.user.uid && this.$data.input.length) {
+        firebase
+          .database()
+          .ref('message')
+          .push(
+            {
+              message: this.$data.input,
+              name: this.$data.user.displayName,
+              image: this.$data.user.photoURL
+            },
+            () => {
+              this.$data.input = ''
+            }
+          )
+      }
     }
   }
 })
