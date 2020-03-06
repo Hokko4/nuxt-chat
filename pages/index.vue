@@ -37,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { Component, Vue } from 'vue-property-decorator'
+import { Component, Vue, Watch } from 'vue-property-decorator'
 import firebase from '~/plugins/firebase'
 import auth from '~/plugins/auth'
 
@@ -67,9 +67,6 @@ import auth from '~/plugins/auth'
             image: message.image,
             message: message.message
           })
-          this.$nextTick(() => {
-            window.scrollTo(0, document.body.offsetHeight)
-          })
         })
       } else {
         rMsg.limitToLast(10).off('child_added', snap => {
@@ -79,9 +76,6 @@ import auth from '~/plugins/auth'
             name: message.name,
             image: message.image,
             message: message.message
-          })
-          this.$nextTick(() => {
-            window.scrollTo(0, document.body.offsetHeight)
           })
         })
       }
@@ -103,9 +97,6 @@ import auth from '~/plugins/auth'
               this.$data.input = ''
             }
           )
-        this.$nextTick(() => {
-          window.scrollTo(0, document.body.offsetHeight)
-        })
       }
     }
   }
@@ -113,6 +104,17 @@ import auth from '~/plugins/auth'
 export default class Index extends Vue {
   user: object = {}
   chat: Array<object> = []
+
+  private mounted() {
+    this.scrollBottom()
+  }
+
+  @Watch('chat')
+  public scrollBottom() {
+    this.$nextTick(() => {
+      window.scrollTo(0, document.body.offsetHeight)
+    })
+  }
 }
 </script>
 
