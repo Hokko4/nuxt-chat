@@ -57,28 +57,17 @@ import auth from '~/plugins/auth'
     auth().then(user => {
       this.$data.user = user ? user : {}
       const rMsg = firebase.database().ref('message')
-      if (user) {
-        this.$data.chat = []
-        rMsg.limitToLast(10).on('child_added', snap => {
-          const message = snap.val()
-          this.$data.chat.push({
-            key: snap.key,
-            name: message.name,
-            image: message.image,
-            message: message.message
-          })
+
+      this.$data.chat = []
+      rMsg.limitToLast(10).on('child_added', snap => {
+        const message = snap.val()
+        this.$data.chat.push({
+          key: snap.key,
+          name: message.name,
+          image: message.image,
+          message: message.message
         })
-      } else {
-        rMsg.limitToLast(10).off('child_added', snap => {
-          const message = snap.val()
-          this.$data.chat.push({
-            key: snap.key,
-            name: message.name,
-            image: message.image,
-            message: message.message
-          })
-        })
-      }
+      })
     })
   },
   methods: {
@@ -102,11 +91,18 @@ import auth from '~/plugins/auth'
   }
 })
 export default class Index extends Vue {
-  user: object = {}
-  chat: Array<object> = []
-
   private mounted() {
     this.scrollBottom()
+  }
+
+  public childAdded(snap: any) {
+    const message = snap.val()
+    this.$data.chat.push({
+      key: snap.key,
+      name: message.name,
+      image: message.image,
+      message: message.message
+    })
   }
 
   @Watch('chat')
@@ -119,6 +115,35 @@ export default class Index extends Vue {
 </script>
 
 <style lang="scss" scoped>
+.comment {
+  width: 100%;
+}
+.comment__item {
+  display: flex;
+  align-items: flex-start;
+  padding: 2rem 1rem;
+
+  & + & {
+    border-top: 1px solid #848688;
+  }
+}
+.comment__item-image {
+  align-self: stretch;
+  min-width: 48px;
+
+  img {
+    border-radius: 50%;
+  }
+}
+.comment__item-detail {
+  align-self: stretch;
+  flex: 1 1 80%;
+  margin-left: 1rem;
+}
+.comment__item-name {
+  font-weight: bold;
+}
+
 .chatform {
   width: 100%;
 }
@@ -142,6 +167,11 @@ export default class Index extends Vue {
   background: #60af9d;
   line-height: 1;
   outline: none;
+  white-space: nowrap;
+
+  &:hover {
+    opacity: 0.9;
+  }
 
   &:disabled {
     background: #35373b;

@@ -1,31 +1,6 @@
 <template>
   <v-app dark>
-    <v-navigation-drawer
-      v-model="drawer"
-      :mini-variant="miniVariant"
-      :clipped="clipped"
-      fixed
-      app
-    >
-      <v-list>
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-        >
-          <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
-          </v-list-item-action>
-          <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
-          </v-list-item-content>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
     <v-app-bar :clipped-left="clipped" fixed app>
-      <v-app-bar-nav-icon @click.stop="drawer = !drawer" />
       <v-toolbar-title v-text="title" />
       <div class="user-prof">
         <div class="user-prof__login" v-if="user.uid" key="login">
@@ -42,18 +17,6 @@
         <nuxt />
       </v-container>
     </v-content>
-    <v-navigation-drawer v-model="rightDrawer" :right="right" temporary fixed>
-      <v-list>
-        <v-list-item @click.native="right = !right">
-          <v-list-item-action>
-            <v-icon light>
-              mdi-repeat
-            </v-icon>
-          </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
     <v-footer :fixed="fixed" app>
       <span>&copy; 2020 Hokko4</span>
     </v-footer>
@@ -86,11 +49,11 @@ import auth from '~/plugins/auth'
       miniVariant: false,
       right: true,
       rightDrawer: false,
-      title: 'Nuxt Chat',
+      title: 'Chat',
       user: {}
     }
   },
-  mounted() {
+  created() {
     auth().then(user => {
       this.$data.user = user ? user : {}
     })
@@ -102,13 +65,23 @@ import auth from '~/plugins/auth'
     },
     doLogout() {
       firebase.auth().signOut()
+
+      const rMsg = firebase.database().ref('message')
+      rMsg.limitToLast(10).off('child_added', snap => {
+        const message = snap.val()
+        this.$data.chat.push({
+          key: snap.key,
+          name: message.name,
+          image: message.image,
+          message: message.message
+        })
+      })
+
       location.reload()
     }
   }
 })
-export default class Index extends Vue {
-  user: object = {}
-}
+export default class Default extends Vue {}
 </script>
 
 <style lang="scss" scoped>
@@ -124,6 +97,7 @@ export default class Index extends Vue {
     width: 40px;
     height: 40px;
     margin-left: 10px;
+    border-radius: 50%;
   }
 }
 
