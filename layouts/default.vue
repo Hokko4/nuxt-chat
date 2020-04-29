@@ -61,7 +61,7 @@ import auth from '~/plugins/auth'
   methods: {
     doLogin() {
       const provider = new firebase.auth.TwitterAuthProvider()
-      firebase.auth().signInWithPopup(provider)
+      firebase.auth().signInWithRedirect(provider)
     },
     doLogout() {
       firebase.auth().signOut()
