@@ -40,6 +40,7 @@
 import { Component, Vue, Watch } from 'vue-property-decorator'
 import firebase from '~/plugins/firebase'
 import auth from '~/plugins/auth'
+import ga from '~/plugins/ga'
 
 @Component({
   components: {
@@ -91,7 +92,8 @@ import auth from '~/plugins/auth'
   }
 })
 export default class Index extends Vue {
-  private mounted() {
+  mounted() {
+    this.$ga('page_view')
     this.scrollBottom()
   }
 
